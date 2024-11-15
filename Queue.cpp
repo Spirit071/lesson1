@@ -1,18 +1,7 @@
 #include "queue.h"
-#include <cstdlib> 
 
 void initQueue(Queue* q, unsigned int size) {
-    if (size == 0) {
-        return; // Prevent initialization with size 0
-    }
-    q->data = (unsigned int*)malloc(size * sizeof(unsigned int));
-    if (q->data == nullptr) {
-        q->size = 0;
-        q->count = 0;
-        q->front = 0;
-        q->rear = 0;
-        return;
-    }
+    q->data = (size > 0) ? new unsigned int[size] : nullptr;
     q->front = 0;
     q->rear = 0;
     q->size = size;
@@ -20,10 +9,8 @@ void initQueue(Queue* q, unsigned int size) {
 }
 
 void cleanQueue(Queue* q) {
-    if (q->data != nullptr) {
-        free(q->data); 
-        q->data = nullptr;
-    }
+    delete[] q->data;
+    q->data = nullptr;
     q->front = 0;
     q->rear = 0;
     q->size = 0;
@@ -31,28 +18,25 @@ void cleanQueue(Queue* q) {
 }
 
 void enqueue(Queue* q, unsigned int newVal) {
-    if (isFull(q)) {
-        return; 
+    if (!isFull(q)) {
+        q->data[q->rear] = newVal;
+        q->rear = (q->rear + 1) % q->size;
+        q->count++;
     }
-    q->data[q->rear] = newVal; 
-    q->rear = (q->rear + 1) % q->size; 
-    q->count++;
 }
 
 int dequeue(Queue* q) {
-    if (isEmpty(q)) {
-        return -1; // Return -1 if the queue is empty
-    }
-    unsigned int value = q->data[q->front]; 
-    q->front = (q->front + 1) % q->size; 
-    q->count--; 
+    if (isEmpty(q)) return -1;
+    unsigned int value = q->data[q->front];
+    q->front = (q->front + 1) % q->size;
+    q->count--;
     return value;
 }
 
 bool isEmpty(const Queue* q) {
-    return q->count == 0; // Return true if the queue is empty
+    return q->count == 0;
 }
 
 bool isFull(const Queue* q) {
-    return q->count == q->size; // Return true if the queue is full
+    return q->count == q->size;
 }
